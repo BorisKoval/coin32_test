@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+  integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<title>Shortener</title>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Shortener</title>
+</head>
+
+<body>
+
+  <form action="/generate_url/" method="post" class="form-inline"
+    style="padding: 10px 10px 10px 10px; margin-left: 110px;">
+    {% csrf_token %}
+    <div class="form-group mb-2">
+      <label for="origin_url" style="padding: 10px 10px 10px 10px;">Введите URL: </label>
+      <input id="origin_url" type="text" name="origin_url" value="{{ origin_url }}" class="form-control">
+    </div>
+    <div class="form-group mx-sm-3 mb-2">
+      <label for="subpart" style="padding: 10px 10px 10px 10px;">Ваш вариант сокращения:</label>
+      <input id="subpart" type="text" name="subpart" value="{{ subpart }}" class="form-control">
+    </div>
+    <input type="submit" value="Создать" class="btn btn-primary" style="margin-bottom: 10px;">
+
+    <table class="table" cellpadding="7" style="width: 50%; margin-top: 30px;">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Ваш URL</th>
+          <th scope="col">Сокращенный URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for url in page_obj %}
+        <tr>
+          <td><a href={{url.origin_url}}>{{url.origin_url}}</a></td>
+          <td><a href={{url.short_url}}>{{url.host_short_url}}</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
+
+  <div class="pagination" style="margin-left: 110px;">
+    <span class="step-links">
+      {% if page_obj.has_previous %}
+      <a href="?page=1">&laquo; первая</a>
+      <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+      {% endif %}
+
+      <span class="current">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+      </span>
+
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+      {% endif %}
+    </span>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <script>
+        alert('{{ message }}');
+      </script>
+    {% endfor %}
+  {% endif %}
+
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+.idea/*
+*.xml
+*.log
+*.dat
+*.bak
+*.dir

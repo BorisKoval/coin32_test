@@ -1,5 +1,7 @@
-from django.db import models
 from django.contrib.sessions.models import Session
+from django.db import models
+
+from coin32_test.logger import log_info
 
 
 class ShortUrls(models.Model):
@@ -7,7 +9,7 @@ class ShortUrls(models.Model):
 
     origin_url = models.TextField('URL')
 
-    short_url = models.TextField('Короткий URL')
+    short_url = models.CharField('Короткий URL', unique=True, max_length=100)
 
     session = models.ForeignKey(
         Session, on_delete=models.CASCADE, verbose_name='Сессия пользователя')
@@ -22,3 +24,12 @@ class ShortUrls(models.Model):
 
     class Meta:
         ordering = ['-id']
+
+    def create_log_message(self):
+        """Создание типового сообщения для лога"""
+        msg = (
+            f'Session Key: {self.session_id} | '
+            f'Short URL: {self.short_url} | '
+            f'Origin URL: {self.origin_url}'
+        )
+        return msg

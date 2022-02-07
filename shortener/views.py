@@ -13,8 +13,8 @@ from django.views.generic import ListView
 
 from rest_framework import generics
 from rest_framework import serializers
-from shortener.logger import log_on_exception
-from shortener.logger import logger
+from coin32_test.logger import log_info
+from coin32_test.logger import log_on_exception
 
 from .constants import PADDING_LIMIT
 from .constants import SUBPART_LIMIT
@@ -64,7 +64,7 @@ def generate_url(request):
         URLValidator()(origin_url)
     except ValidationError:
         messages.info(request, 'Введен некорректный URL!')
-        logger.info(f'Введен некорректный {origin_url}')
+        log_info(f'Введен некорректный {origin_url}', request)
         return redirect('/')
 
     subpart = request.POST["subpart"]
@@ -75,7 +75,7 @@ def generate_url(request):
             f'Ваш вариант сокращения URL прешивает ограничие в '
             f'{SUBPART_LIMIT} символов!'
         )
-        logger.info('Превышено ограничие символов в сокращении URL')
+        log_info('Превышено ограничие символов в сокращении URL', request)
         return redirect('/')
 
     if subpart:
@@ -89,14 +89,14 @@ def generate_url(request):
     )
     if subpart_exists:
         messages.info(request, 'Данный Сокращенный URL уже существует!')
+        log_info('Данный Сокращенный URL уже существует!', request)
     else:
-        ShortUrls.objects.get_or_create(
+        obj, _ = ShortUrls.objects.get_or_create(
             origin_url=origin_url,
             short_url=short_url,
             session_id=session_id
         )
-
-        cache.set(short_url, origin_url)
+        log_info(f'Создан сокращенный URL. {obj.create_log_message()}')
 
     return redirect('/')
 
@@ -124,6 +124,8 @@ def short_url_redirect(request, subpart):
             session_id=session_id,
             short_url=short_url
         ).values_list('origin_url', flat=True).first()
+
+        cache.set(short_url, origin_url)
     else:
         origin_url = cached_origin_url
     if origin_url:

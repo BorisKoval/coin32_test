@@ -10,7 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
+from configparser import ConfigParser
 from pathlib import Path
+
+CONF_PATH = os.path.join('.', 'config')
+if not os.path.exists(CONF_PATH):
+    os.mkdir(CONF_PATH)
+CONF_FILES = [os.path.join(CONF_PATH, 'shortener.conf')]
+
+config_parser = ConfigParser()
+config_parser.read(filenames=CONF_FILES)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,11 +88,13 @@ WSGI_APPLICATION = 'coin32_test.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'shortener',
-        'USER': 'user',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
+        'ENGINE': config_parser.get(
+            'database', 'ENGINE', fallback='django.db.backends.mysql'),
+        'NAME': config_parser.get('database', 'NAME', fallback='shortener'),
+        'USER': config_parser.get('database', 'USER', fallback='user'),
+        'PASSWORD': config_parser.get(
+            'database', 'PASSWORD', fallback='password'),
+        'HOST': config_parser.get('database', 'HOST', fallback='localhost'),
     }
 }
 

@@ -1,7 +1,7 @@
 import datetime
 
 from celery import Celery
-from django_redis import get_redis_connection
+from django.core.cache import cache
 
 from .constants import CLEAR_OLD_URL_HOURS
 from .constants import DAYS_TO_CLEAR_URLS
@@ -48,6 +48,8 @@ def clear_old_urls_and_cache():
     _now = datetime.datetime.now()
     old_urls = ShortUrls.objects.filter(
         created__lte=_now - datetime.timedelta(days=DAYS_TO_CLEAR_URLS))
+    shorts_urls = list(old_urls.values_list('short_url', flat=True))
+
     old_urls.delete()
 
-    get_redis_connection("default").flushall()
+    cache.delete_many(shorts_urls)
